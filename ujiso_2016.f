@@ -24,7 +24,7 @@ C     NISO = number of isotopologues (format I1) excluding parent
 C     IFF  = zero, unless NF = IFF (format I5) frequencies are to be
 C            input directly
 C
-    1 READ(IR,100) PROG,NISO,IFFREQ,SCALE
+    1 READ(IR,100) PROG,NISO,IFF,SCALE
       IF(PROG.EQ.UJI) THEN
 C
 C     NT = number of temperatures (degrees K, up to 7 allowed)
@@ -408,6 +408,7 @@ C
       DO 2  J=1,I
       IJ=IJ+1
     2 V(IJ)=F(IJ)/(GI*G(J))
+      IF( IFF.NE.0 ) RETURN
       DO 4  I=1,NC
     4 FREQ(I)=ZERO
       CALL EIGEN(NC,V)
