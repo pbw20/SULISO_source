@@ -1,13 +1,23 @@
 C     PROGRAM UJISO
 C
-C     Calculates isotopic partition-function ratios for subsets 
-C     containing up to 1000 atoms.
+C     Calculates isotopic partition function ratios for species 
+C     with up to a maximum number of atoms set in the header file
+C     CAM_SIZE.
 C
 C     IAN H. WILLIAMS, Department of Chemistry, University of Bath
 C
-C     version 7: April 2015
+C     version 1.8: 16 October 2016
 C
+C     This version uses "CAM_SIZE" to determine the array sizes.
+C     Number of atoms in system is set at (for example) MAXNAT = 1000
+C     -> number of Cartesian coordinates, MAXNC = MAXNAT*3
+C     -> No. of valence coords, MAXNI = MAXNAT*3 + MAXNAT/2
+C     -> no. of independent internal coords, MAXNINT = MAXNC-6
+C     -> max. length linear array MAXDIAG = MAXNC*(MAXNC+1)/2
+C     -> parameter(MAXAPO =MAXNAT + 1)
+
       IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+      INCLUDE 'CAM_SIZE'
       CHARACTER*4 UJI,STOP,PROG
       LOGICAL TSTATE 
       COMMON /USE/IR,IW,NAT,NC,IFF,NT,T(7),QE(2,7),QZ(2,7),QT(2,7),
@@ -24,7 +34,7 @@ C     NISO = number of isotopologues (format I1) excluding parent
 C     IFF  = zero, unless NF = IFF (format I5) frequencies are to be
 C            input directly
 C
-    1 READ(IR,100) PROG,NISO,IFF,SCALE
+    1 READ(IR,100) PROG,NISO,IFFREQ,SCALE
       IF(PROG.EQ.UJI) THEN
 C
 C     NT = number of temperatures (degrees K, up to 7 allowed)
@@ -59,18 +69,19 @@ C
 C
   100 FORMAT(A4,I1,I5,F6.3)
   101 FORMAT(I2,3X,7F10.2)
-  200 FORMAT(20('*'),' UJISO: June 2016 ',20('*'))
+  200 FORMAT(20('*'),' UJISO: 16 October 2016 ',20('*'))
   201 FORMAT(/30('*'),' The End ',30('*'))
   202 FORMAT('Job fails because keyword ',A,' is unrecognised')
       END
 C
       SUBROUTINE PF(ICALC,TSTATE)
+      INCLUDE 'CAM_SIZE'
       IMPLICIT DOUBLE PRECISION (A-H,O-Z)
       LOGICAL SKIP,TSTATE,OMIT
       INTEGER IX(9)
       COMMON /USE/IR,IW,NAT,NC,IFF,NT,T(7),QE(2,7),QZ(2,7),QT(2,7),
      *SLM1,SLF1,RCF1,SLM2,SLF2,RCF2,SCALE
-      COMMON /MOL/F(4501500),FREQ(3000),X(3,1000),W(1000)
+      COMMON /MOL/F(MAXDIAG),FREQ(MAXNC),X(3,MAXNAT),W(MAXNAT)
 C
       DO 1 L=1,6
     1 IX(L)=0
@@ -222,11 +233,12 @@ C 102 FORMAT(6F12.4)
       END
 C
       SUBROUTINE RATIO(ICALC,TSTATE)
+      INCLUDE 'CAM_SIZE'
       IMPLICIT DOUBLE PRECISION (A-H,O-Z)
       LOGICAL TSTATE
       COMMON /USE/IR,IW,NAT,NC,IFF,NT,T(7),QE(2,7),QZ(2,7),QT(2,7),
      *SLM1,SLF1,RCF1,SLM2,SLF2,RCF2,SCALE
-      COMMON /MOL/F(4501500),FREQ(3000),X(3,1000),W(1000)
+      COMMON /MOL/F(MAXDIAG),FREQ(MAXNC),X(3,MAXNAT),W(MAXNAT)
 C
 C     Check for internal consistency of calculations:
 C     PRODMR & PRODFR should be equal.
@@ -279,6 +291,7 @@ C
       END
 C
       SUBROUTINE XMI(ICALC)
+      INCLUDE 'CAM_SIZE'
       IMPLICIT DOUBLE PRECISION (A-H,O-Z)
       CHARACTER*80 TITLE
       CHARACTER*4 ATOM(50),IAT(1000),IA,LAST
@@ -288,7 +301,7 @@ C     Input isotopic masses and molecular geometry
 C
       COMMON /USE/IR,IW,NAT,NC,IFF,NT,T(7),QE(2,7),QZ(2,7),QT(2,7),
      *SLM1,SLF1,RCF1,SLM2,SLF2,RCF2,SCALE
-      COMMON /MOL/F(4501500),FREQ(3000),X(3,1000),W(1000)
+      COMMON /MOL/F(MAXDIAG),FREQ(MAXNC),X(3,MAXNAT),W(MAXNAT)
       DIMENSION Z(50)
       DATA Z/1.007825D0,2.014102D0,3.016050D0,12.0D0,13.003354826D0,
      * 14.003242D0,14.003074002D0,15.00010897D0,15.99491463D0,
@@ -378,10 +391,11 @@ C 105 FORMAT(A4,3F14.7)
       END
 C
       SUBROUTINE FCI
+      INCLUDE 'CAM_SIZE'
       IMPLICIT DOUBLE PRECISION (A-H,O-Z)
       COMMON /USE/IR,IW,NAT,NC,IFF,NT,T(7),QE(2,7),QZ(2,7),QT(2,7),
      *SLM1,SLF1,RCF1,SLM2,SLF2,RCF2,SCALE
-      COMMON /MOL/F(4501500),FREQ(3000),X(3,1000),W(1000)
+      COMMON /MOL/F(MAXDIAG),FREQ(MAXNC),X(3,MAXNAT),W(MAXNAT)
       NNC= NC*(NC+1)/2
       READ(IR,107) (F(I),I=1,NNC)
       RETURN
@@ -391,10 +405,11 @@ C 107 FORMAT(6F12.8)
 C
       SUBROUTINE VIBI
       IMPLICIT DOUBLE PRECISION (A-H,O-Z)
-      DOUBLE PRECISION V(4501500),G(3000)
+      INCLUDE 'CAM_SIZE'
+      DOUBLE PRECISION V(MAXDIAG),G(MAXNC)
       COMMON /USE/IR,IW,NAT,NC,IFF,NT,T(7),QE(2,7),QZ(2,7),QT(2,7),
      *SLM1,SLF1,RCF1,SLM2,SLF2,RCF2,SCALE
-      COMMON /MOL/F(4501500),FREQ(3000),X(3,1000),W(1000)
+      COMMON /MOL/F(MAXDIAG),FREQ(MAXNC),X(3,MAXNAT),W(MAXNAT)
       DATA TFACT/2.6436411815482D07/,ZERO/0.0D0/
       L=0
       DO 1  N=1,NAT
@@ -408,7 +423,6 @@ C
       DO 2  J=1,I
       IJ=IJ+1
     2 V(IJ)=F(IJ)/(GI*G(J))
-      IF( IFF.NE.0 ) RETURN
       DO 4  I=1,NC
     4 FREQ(I)=ZERO
       CALL EIGEN(NC,V)
@@ -424,11 +438,12 @@ C
       END
 C
       SUBROUTINE EIGEN(N,A)
+      INCLUDE 'CAM_SIZE'
       IMPLICIT DOUBLE PRECISION (A-H,O-Z)
       COMMON /USE/IR,IW,NAT,NC,IFF,NT,T(7),QE(2,7),QZ(2,7),QT(2,7),
      *SLM1,SLF1,RCF1,SLM2,SLF2,RCF2,SCALE
-      COMMON /MOL/F(4501500),E(3000),X(3,1000),WT(1000)
-      DIMENSION W(5,3000),A(45015000)
+      COMMON /MOL/F(MAXDIAG),E(MAXNC),X(3,MAXNAT),WT(MAXNAT)
+      DIMENSION W(5,MAXNC),A(MAXDIAG)
       EPS3=1.D-30
       ZERO=0.D0
       LL=(N*(N+1))/2+1
@@ -531,5 +546,6 @@ C
       IF(J.GE.2) GOTO 170
   210 RETURN
       END
+
 
 

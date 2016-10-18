@@ -1,21 +1,19 @@
-c Header file for camvib and camiso to set
-c up the size of the problem they can treat.
-C All parameters are a function of the maximum number of atoms.
-C 31 April 1997 - AJT
-C 19 March 1999  Size increased - IHW
-C 16 March 2004  Size increased again!  - IHW
+! Header file for CAMVIB, CAMISO, LIPFR and UJISO to set array
+! sizes as functions of the maximum number of atoms.
+! 
+! 31 April 1997 - AJT
+! 16 October 2016 - IHW
 
       parameter(MAXNAT =1000)
 
-C  These should not be touched
-      parameter(MAXNC  =MAXNAT * 3)
-      parameter(MAXNI  =MAXNAT * 3 + MAXNAT / 2)
-      parameter(MAXNINT=MAXNC  - 6)
-      parameter(MAXDIAG=MAXNC * MAXNC / 2 + (MAXNC *3 ) / 2 )
-      parameter(MAXAPO =MAXNAT + 1)
+! These should not be touched:
+      parameter(MAXNC  = MAXNAT * 3)
+      parameter(MAXNI  = MAXNAT * 3 + MAXNAT / 2)
+      parameter(MAXNINT= MAXNC  - 6)
+      parameter(MAXDIAG= MAXNC  * (MAXNC + 1) / 2)
+      parameter(MAXAPO = MAXNAT + 1)
 
-C for Camiso
-
-      parameter(MAXFCMS =MAXDIAG * 3)
-      parameter(MAXXYZ = MAXNAT * 10)
+! For CAMISO:
+      parameter(MAXFCMS = MAXDIAG * 3)
+      parameter(MAXXYZ =  MAXNAT * 10)
 
